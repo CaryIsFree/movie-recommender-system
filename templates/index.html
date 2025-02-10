@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<div class="grid-container">
+    {% for item in movies %}
+    <a href="{{ url_for('movie_page', movie_id=item[0]) }}" class="grid-item">
+        <div class="text-wrapper">
+            {{ item[1] }}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

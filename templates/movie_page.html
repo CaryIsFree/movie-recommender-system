@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<div>
+    <div style="display: flex; justify-content: space-between;">
+        <h3 style="margin-right: 3rem; display: inline-block; vertical-align: bottom;">{{ movie_info[1] }}</h3>
+        <button id="like-button" data-id="{{ movie_info[0] }}" padding: 1px;>Like ♡</button>
+    </div>
+    <ul>
+        <li>IMDb: {{ movie_info[0] }}</li>
+        <li>Release Date: {{ movie_info[2] }}</li>
+        <li>Rating: {{ movie_info[3] }} ({{ movie_info[4] }} votes)</li>
+    <ul>
+</div>
+
+<div>
+    <h3>Recommedations</h2>
+    <div class="grid-container">
+        {% for item in recommendations %}
+        <a href="{{ url_for('movie_page', movie_id=item[0]) }}" class="grid-item">
+            <div class="text-wrapper">
+                {{ item[1] }}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+<script>
+    document.getElementById("like-button").addEventListener("click", function() {
+        const dataId = this.getAttribute("data-id");
+        fetch("/add_like", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: dataId })
+        })
+        .then(response => response.json())
+        .then(data => console.log("Response:", data));
+    });
+</script>
+{% endblock %}

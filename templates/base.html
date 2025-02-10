@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/missing.css@1.1.1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Movie Recommender</title>
+    <script>
+        function searchMovies() {
+            let query = document.getElementById('search').value;
+            if (query.length < 2) {
+                document.getElementById('dropdown').innerHTML = "";
+                return;
+            }
+
+            fetch(`/search?q=${query}`)
+                .then(response => response.json())
+                .then(movies => {
+                    let dropdown = document.getElementById('dropdown');
+                    dropdown.innerHTML = "";
+
+                    movies.forEach(movie => {
+                        let item = document.createElement("div");
+                        item.innerText = movie.title;
+                        item.classList.add("dropdown-item");
+                        item.onclick = () => window.location.href = `movie/${movie.id}`;
+                        dropdown.appendChild(item);
+                    });
+                });
+        }
+    </script>
+    <style>
+        #search-container { position: relative; width: 300px; }
+        #search { 
+            width: 100%; padding: 10px; border: 1px solid #ccc; 
+            border-radius: 5px; font-size: 16px; outline: none;
+        }
+        #search::placeholder {
+          text-align: left;
+        }
+        .dropdown { 
+            position: absolute; width: 100%; background: white; 
+            border: 1px solid #ccc; border-radius: 5px; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 200px; overflow-y: auto; z-index: 1000; 
+            top: 100%; left: 0;
+        }
+        .dropdown-item { 
+            padding: 10px; cursor: pointer; font-size: 14px; 
+            border-bottom: 1px solid #eee;
+            color: black;
+        }
+        .dropdown-item:hover { background: #007bff; color: white; }
+        .dropdown-item:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <header style="display: flex; justify-content: space-between">
+        <a href="{{ url_for('home') }}" style="text-decoration: none; color: inherit">
+            <h1>Movie Recommender</h1>
+        </a>
+        <a href="{{ url_for('profile') }}" style="text-decoration: none; color: inherit">
+            <img src="../static/images/guy-eating-popcorn.png" alt="guy eating popcorn" style="width: 10rem; height: 2.5rem;">
+        </a>
+    </header>
+    <main>
+        <div class="wrapper">
+            <div id="search-container">
+                <input type="text" id="search" onkeyup="searchMovies()" placeholder="Search for a movie...">
+                <div id="dropdown" class="dropdown"></div>
+            </div>
+            {% block main_content %}{% endblock %}
+        </div>
+    </main>
+</body>
+
+</html>
