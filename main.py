@@ -2,11 +2,9 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, MultiLabelBinarizer
 import ast
-from sentence_transformers import SentenceTransformer
 from sklearn.neighbors import NearestNeighbors
 import spacy
 import ast
-from sklearn.preprocessing import OneHotEncoder
 
 # Load in the data using pandas
 df = pd.read_csv('./data/movielens/movies_metadata.csv')
