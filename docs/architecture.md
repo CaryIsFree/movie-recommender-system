@@ -6,16 +6,24 @@ The system uses a content-based recommendation approach with the following compo
 
 ### 1. Data Processing
 - Movie features are extracted from the MovieLens dataset
-- Text features are processed using spaCy and sentence-transformers
-- Numerical features are scaled using StandardScaler
+- Text processing:
+  - Movie titles processed using spaCy (en_core_web_md model)
+  - Movie descriptions processed using sentence-transformers (all-MiniLM-L6-v2 model)
+- Genre processing using MultiLabelBinarizer for multi-label classification
+- Numerical features normalized using StandardScaler
 
 ### 2. Recommendation Engine
 - Uses K-Nearest Neighbors for finding similar movies
 - Features used include:
-  - Movie genres (one-hot encoded)
-  - Movie descriptions (text embeddings)
-  - Popularity metrics
-  - Vote counts and averages
+  - Movie genres (multi-label binarized)
+  - Movie titles (spaCy vector embeddings)
+  - Movie descriptions (sentence transformer embeddings)
+  - Numerical features (scaled):
+    - Popularity
+    - Vote counts and averages
+    - Revenue
+    - Runtime
+    - Adult rating
 
 ### 3. Database
 - SQLite database for storing:
