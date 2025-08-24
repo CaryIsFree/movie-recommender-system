@@ -2,6 +2,21 @@
 
 A machine learning-based movie recommendation system that suggests movies based on user preferences and movie similarities.
 
+## Prerequisites
+
+While this application can run on various operating systems, this installation guide is specifically written for Linux users. Windows and macOS users may need to adapt the commands accordingly.
+
+Before you begin, ensure you have the following installed:
+- Python 3.13 or higher
+- Visual Studio Code, PyCharm, or another Python IDE (recommended for development)
+- Web browser (Chrome, Firefox, Safari, or Edge)
+
+### System Requirements
+
+- At least 4GB of RAM (8GB recommended)
+- 2GB of free disk space for models and data
+- Internet connection for initial setup and model downloads
+
 ## Features
 
 - Content-based movie recommendations
@@ -35,20 +50,39 @@ movie-recommender-system/
 └── requirements.txt        # Dependencies
 ```
 
-## Setup
+## Development Setup
 
-1. Create a virtual environment:
+1. Clone the repository:
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # On Linux/Mac
+git clone https://github.com/CaryIsFree/movie-recommender-system.git
+cd movie-recommender-system
 ```
 
-2. Install dependencies:
+2. Create a virtual environment:
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Run the application:
+4. Open the project in your IDE:
+- For VS Code: `code .`
+- For PyCharm: Open the project directory
+
+5. Configure Python Interpreter:
+- In VS Code: Command Palette (Ctrl+Shift+P) → Python: Select Interpreter → Select the virtual environment
+- In PyCharm: Settings → Project → Python Interpreter → Select the virtual environment
+
+6. Generate the models (first time only):
+```bash
+python src/create_model.py
+```
+
+7. Run the application:
 ```bash
 python src/app.py
 ```
