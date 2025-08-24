@@ -5,12 +5,19 @@ import ast
 from sklearn.neighbors import NearestNeighbors
 import spacy
 import ast
+import os
+from pathlib import Path
+
+# Get the absolute path of the project root directory
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Load in the data using pandas
-df = pd.read_csv('./data/movielens/movies_metadata.csv')
+df = pd.read_csv(PROJECT_ROOT / 'data/movielens/movies_metadata.csv', dtype={'popularity': object})
+print("Data loaded.")
 
 df_encoded = df.copy() # Copy the df so we preserve the original one
-df_encoded = df_encoded[df_encoded['popularity'].apply(lambda x: isinstance(x, float))]
+df_encoded['popularity'] = pd.to_numeric(df_encoded['popularity'], errors='coerce')
+df_encoded = df_encoded.dropna(subset=['popularity'])
 df_encoded = df_encoded[df_encoded['genres'].apply(lambda i:
     bool(ast.literal_eval(i)) and  # Ensure list is not empty
     isinstance(list(ast.literal_eval(i)[0].values())[1], str)  # Check second value type
@@ -69,10 +76,11 @@ genre_encoded = pd.DataFrame(mlb.fit_transform(df_encoded['genres']), columns=ml
 df_encoded = pd.concat([df_encoded.drop(columns=['genres']), genre_encoded], axis=1)
 
 # Description
-# overview = df_encoded['overview']
-# model = SentenceTransformer('all-MiniLM-L6-v2')
-# embeddings = model.encode(overview)
-# df_encoded['overview'] = df_encoded['overview'].apply(model.encode)
+df_encoded['overview'] = df_encoded['overview'].fillna('')
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
+embeddings = model.encode(df_encoded['overview'].tolist())
+df_encoded['overview_embedding'] = list(embeddings)
 df_encoded = df_encoded.dropna().reset_index(drop=True)
 
 # KNN for title search
@@ -82,11 +90,34 @@ title_knn.fit(title_vectors)
 
 # KNN for recommendations
 scaler = StandardScaler()
-features = ['adult', 'popularity', 'vote_average', 'vote_count', 'revenue', 'runtime'] + list(mlb.classes_)
-scaled_features = scaler.fit_transform(df_encoded[features])
+numerical_features = ['adult', 'popularity', 'vote_average', 'vote_count', 'revenue', 'runtime'] + list(mlb.classes_)
+scaled_numerical_features = scaler.fit_transform(df_encoded[numerical_features])
+
+# Combine scaled numerical features with overview embeddings
+overview_embeddings = np.array(df_encoded['overview_embedding'].tolist())
+combined_features = np.concatenate([scaled_numerical_features, overview_embeddings], axis=1)
 
 rec_knn = NearestNeighbors(n_neighbors=3, metric='euclidean')
-rec_knn.fit(scaled_features)
+rec_knn.fit(combined_features)
+
+# Save the features and models using joblib
+from joblib import dump
+
+# Create models directory if it doesn't exist
+models_dir = PROJECT_ROOT / 'models'
+models_dir.mkdir(exist_ok=True)
+
+# Save df_encoded
+dump(df_encoded, models_dir / 'df_encoded.pkl')
+
+# Save scaled features
+dump(scaled_numerical_features, models_dir / 'scaled_features.pkl')
+
+# Save KNN models
+dump(title_knn, models_dir / 'title_knn.pkl')
+dump(rec_knn, models_dir / 'rec_knn.pkl')
+
+print("Features and models saved successfully!")
 
 def recommend_movies(movie_title, num_recommendations=3):
     # Find the movie index using the title KNN
@@ -95,7 +126,7 @@ def recommend_movies(movie_title, num_recommendations=3):
     movie_idx = indices[0][0]
 
     # Get recommendations using the recommendation KNN
-    distances, indices = rec_knn.kneighbors([scaled_features[movie_idx]], n_neighbors=num_recommendations+1)
+    distances, indices = rec_knn.kneighbors([combined_features[movie_idx]], n_neighbors=num_recommendations+1)
 
     # Get recommended movie titles (excluding the input movie)
     recommended_titles = df_encoded.iloc[indices[0][1:]]['title'].tolist()

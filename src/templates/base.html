@@ -23,7 +23,7 @@
                         let item = document.createElement("div");
                         item.innerText = movie.title;
                         item.classList.add("dropdown-item");
-                        item.onclick = () => window.location.href = `movie/${movie.id}`;
+                        item.onclick = () => window.location.href = `/movie/${movie.id}`;
                         dropdown.appendChild(item);
                     });
                 });

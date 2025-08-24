@@ -4,7 +4,9 @@
 <div>
     <div style="display: flex; justify-content: space-between;">
         <h3 style="margin-right: 3rem; display: inline-block; vertical-align: bottom;">{{ movie_info[1] }}</h3>
-        <button id="like-button" data-id="{{ movie_info[0] }}" padding: 1px;>Like ♡</button>
+        <button id="like-button" data-id="{{ movie_info[0] }}" class="{{ 'liked' if is_liked else '' }}">
+            {{ '♥' if is_liked else '♡' }}
+        </button>
     </div>
     <ul>
         <li>IMDb: {{ movie_info[0] }}</li>
@@ -14,7 +16,7 @@
 </div>
 
 <div>
-    <h3>Recommedations</h2>
+    <h3>Recommendations</h2>
     <div class="grid-container">
         {% for item in recommendations %}
         <a href="{{ url_for('movie_page', movie_id=item[0]) }}" class="grid-item">
@@ -27,14 +29,27 @@
 </div>
 <script>
     document.getElementById("like-button").addEventListener("click", function() {
-        const dataId = this.getAttribute("data-id");
-        fetch("/add_like", {
+        const button = this;
+        const dataId = button.getAttribute("data-id");
+        fetch("/toggle_like", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: dataId })
         })
         .then(response => response.json())
-        .then(data => console.log("Response:", data));
+        .then(data => {
+            if (data.status === "liked") {
+                button.textContent = "♥";
+                button.classList.add("liked");
+            } else {
+                button.textContent = "♡";
+                button.classList.remove("liked");
+                // Reload homepage if we're removing a like
+                if (document.referrer === window.location.origin + '/') {
+                    window.location.href = '/';
+                }
+            }
+        });
     });
 </script>
 {% endblock %}

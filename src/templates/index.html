@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<div>
+    <h2 style="margin-left: 10px; margin-bottom: 2rem;">My Liked Movies</h2>
+    {% if not movies %}
+    <p style="margin-left: 10px; color: #666;">No liked movies yet. Browse and like some movies to see them here!</p>
+    {% endif %}
+    <div class="grid-container" style="margin-top: 1rem;">
+        {% for item in movies %}
+        <a href="{{ url_for('movie_page', movie_id=item[0]) }}" class="grid-item">
+            <div class="text-wrapper">
+                {{ item[1] }}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
